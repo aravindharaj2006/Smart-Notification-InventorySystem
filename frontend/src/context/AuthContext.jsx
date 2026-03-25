@@ -1,0 +1,53 @@
+import React, { createContext, useState, useEffect } from 'react';
+import {jwtDecode} from 'jwt-decode';
+
+export const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        // Check if token is expired
+        if (decoded.exp * 1000 < Date.now()) {
+          logout();
+        } else {
+          setUser({
+            userId: decoded.userId,
+            role: decoded.role,
+            email: decoded.sub,
+          });
+        }
+      } catch (err) {
+        logout();
+      }
+    }
+    setLoading(false);
+  }, [token]);
+
+  const login = (newToken, authData) => {
+    localStorage.setItem('token', newToken);
+    setToken(newToken);
+    setUser({
+      userId: authData.userId,
+      role: authData.role,
+      name: authData.name,
+    });
+  };
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};

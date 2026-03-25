@@ -1,0 +1,16 @@
+# Java
+target/
+*.class
+
+# Node
+node_modules/
+
+# Env files
+.env
+
+# IntelliJ
+.idea/
+*.iml
+
+# Logs
+*.log
